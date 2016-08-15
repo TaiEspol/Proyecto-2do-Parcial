@@ -125,19 +125,18 @@ public final class Mar implements Runnable {
 
     @Override
     public void run() {
-            while(true){
-                Thread t1= new Thread(this.tiburones[0]);
-                Thread t2= new Thread(this.tiburones[1]);
-                Thread t3= new Thread(this.tiburones[2]);
-                Thread t4= new Thread(this.tiburones[3]);
-                Thread t5= new Thread(this.tiburones[4]);
-                t1.start();
-                t2.start();
-                t3.start();
-                t4.start();
-                t5.start();
-                break;
+            thread = new ArrayList<>();
+            Iterator t = thread.iterator();
+            for (int i = 0; i < this.getTiburones().length; i++) {
+               this.thread.add(new Thread(this.getTiburones()[i]));
             }
+
+            while (true) {
+               for (int i = 0; i < thread.size(); i++) {
+                 this.thread.get(i).start();
+               }
+             break;
+           }
     }
 
 }
