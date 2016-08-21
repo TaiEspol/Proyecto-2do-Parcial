@@ -16,17 +16,28 @@ import javafx.scene.text.Font;
  */
 public final class Letra  {
     private Label letra;
-    public Letra(String text,double x,double y) {
-       this.letra=new Label(text);
-      letra.relocate(x, y);
+    private String s;
+    
+
+    public Letra(String text, double x, double y) {
+        this.s = text;
+        this.letra = new Label(text);
+        letra.relocate(x, y);
+        this.setText();
+
     }
+    
+
     public Label getLetra() {
         return letra;
     }
-    public void setText(Group p) {
-        letra.setFont(Font.font("Time New Roman", 35));
-        letra.setTextFill(Color.CHARTREUSE);
-        p.getChildren().add(letra);
+
+    public void setText() {
+        letra.setFont(Font.font("Time New Roman", 50));
+        letra.setTextFill(Color.RED);
+    }
+    public String getS() {
+        return s;
     }
     
 }
