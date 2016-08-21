@@ -27,26 +27,35 @@ import javafx.util.Duration;
  */
 public final class Mar implements Runnable {
 
-    Pane p;
-    Circle[] c, f;
-    Circle piedra;
-    Tiburon[] tiburones;
-    Buseador buso;
+    private Pane p;
+    private Image imagen;
+    private ImageView verImagen;
+    private Circle[] c, f;
+    private ArrayList<Tiburon> tiburones;
+    private Buseador buso;
+    private ArrayList<Thread> thread;
+    private int numTiburon;
+    private Random random = new Random();
+    private int ancho;
+    private int alto;
 
-    public Mar(int ancho, int alto) {
+    public Mar(int ancho, int alto, numTiburones) {
         //Creamos el contenedor del mar
         p = new Pane();
         p.maxWidth(ancho);
         p.maxHeight(alto);
-        p.setStyle("-fx-background-Color: #00bfff;");
-
+        this.imagen = new Image(Mar.class.getResource("FondoMarino.jpg").toExternalForm());
+        this.verImagen = new ImageView();
+        this.verImagen.setImage(imagen);
+        p.getChildren().add(verImagen);
+        this.numTiburon = numTiburones;
+        this.addTiburones(this.numTiburon);
         this.Burbujas();
-        this.addTiburones();
         this.addBuzo();
-     //   this.addPiraña();
-
-        piedra = new Circle(1325, 690, 50, Color.BLACK);
-        p.getChildren().add(piedra);
+        this.alto = alto;
+        this.ancho = ancho;
+        p.setFocusTraversable(true);
+        p.setOnKeyPressed(new Teclea());
     }
 
     public void Burbujas() {
@@ -104,6 +113,62 @@ public final class Mar implements Runnable {
             p.getChildren().add(tiburones[j].getGroup());
         }
     }
+    
+    public void verificarTiburon() {
+        for (int i = 0; i < this.getTiburones().size(); i++) {
+            if(this.getTiburones().get(i).verificar()==true){
+                this.buso.setPuntaje(100);
+                System.out.println("Letra completada" + this.getTiburones().get(i).getLabel().toString());
+            }
+            System.out.println("Letra NO completada" );
+        }
+
+    }
+
+    public void verificarPalabra(String e) {
+        Label letra = new Label(e);
+        for (int i = 0; i < this.getTiburones().size(); i++) {
+            for (int j = 0; j < this.getTiburones().get(i).getLabel().getChildren().size(); j++) {
+                if (j == 0) {
+                    if (((Label) this.getTiburones().get(i).getLabel().getChildren().get(0)).getText().equals(letra.getText())) {
+                        for (int n = 0; n < this.getTiburones().size(); n++) {
+                            if (n == 0) {
+                                if (((Label) this.getTiburones().get(n).getLabel().getChildren().get(0)).getText().equals(letra.getText())) {
+                                    if (((Label) this.getTiburones().get(n + 1).getLabel().getChildren().get(0)).getTextFill() != Color.YELLOW) {
+                                        ((Label) this.getTiburones().get(n).getLabel().getChildren().get(0)).setTextFill(Color.YELLOW);
+                                    }
+                                }
+                            } else if (n > 0 && n < this.getTiburones().size() - 1) {
+                                if (((Label) this.getTiburones().get(n).getLabel().getChildren().get(0)).getText().equals(letra.getText())) {
+                                    if (((Label) this.getTiburones().get(n - 1).getLabel().getChildren().get(0)).getTextFill() != Color.YELLOW && ((Label) this.getTiburones().get(n + 1).getLabel().getChildren().get(0)).getTextFill() != Color.YELLOW) {
+                                        ((Label) this.getTiburones().get(n).getLabel().getChildren().get(0)).setTextFill(Color.YELLOW);
+                                    }
+                                }
+                            } else if (n == this.getTiburones().size() - 1) {
+                                if (((Label) this.getTiburones().get(n).getLabel().getChildren().get(0)).getText().equals(letra.getText())) {
+                                    if (((Label) this.getTiburones().get(n - 1).getLabel().getChildren().get(0)).getTextFill() != Color.YELLOW) {
+                                        ((Label) this.getTiburones().get(n).getLabel().getChildren().get(0)).setTextFill(Color.YELLOW);
+                                    }
+                                }
+                            }
+                        }
+
+                        System.out.println("eNTRO");
+                    }
+                } else if (j != 0) {
+                    if (((Label) this.getTiburones().get(i).getLabel().getChildren().get(j - 1)).getTextFill() == Color.YELLOW) {
+                        if (((Label) this.getTiburones().get(i).getLabel().getChildren().get(j)).getText().equals(letra.getText())) {
+                            ((Label) this.getTiburones().get(i).getLabel().getChildren().get(j)).setTextFill(Color.YELLOW);
+                            System.out.println("eNTRO1");
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+    }
 
     public void addBuzo() {
         buso = new Buseador();
@@ -137,6 +202,20 @@ public final class Mar implements Runnable {
                }
              break;
            }
+    }
+    
+    private class Teclea implements EventHandler<KeyEvent> {
+
+        @Override
+        public void handle(KeyEvent e) {
+            if (e.getCode() != KeyCode.CAPS) {
+                String letra = e.getText();
+                verificarPalabra(letra);
+                verificarTiburon();
+            }
+
+        }
+
     }
 
 }
