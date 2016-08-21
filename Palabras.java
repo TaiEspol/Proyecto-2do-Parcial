@@ -10,22 +10,29 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
+import javafx.scene.Group;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyEvent;
 
 /**
  *
  * @author Marbelisa
  */
-public class Palabras {
+public final class Palabras{
 
     private File archivo;
-    private ArrayList<String> palabras;
-    //private ArrayList<String> numPez;
+    private final ArrayList<String> palabras;
+    private final Group group;
     private String[] linea;
-    private Random random = new Random();
-
+    private Letra [] letra;
+    private ArrayList<Label> labelWord;
+    
     public Palabras() {
-        palabras = new ArrayList<String>();
+        group= new Group();
+        palabras = new ArrayList<>();
+        labelWord= new ArrayList<>();
         this.llamarArray();
+        group.setFocusTraversable(true);
 
     }
 
@@ -33,16 +40,12 @@ public class Palabras {
         return palabras;
     }
 
-    /*public ArrayList<String> getNumPez(int num) {
-        numPez = new ArrayList<String>();
-        while(numPez.size()!=num){
-            int valor=random.nextInt(palabras.size());
-            if(numPez.contains(palabras.get(valor))==false){
-                numPez.add(palabras.get(valor));
-            }
-        }
-        return numPez;
-    }*/
+    public Letra[] getLetra() {
+        return letra;
+    }
+    
+    
+
     public ArrayList<String> getWord(int valor) {
         ArrayList<String> word = new ArrayList();
         String palabra = palabras.get(valor);
@@ -53,6 +56,27 @@ public class Palabras {
 
         return word;
     }
+    
+    public Group getPalabraEnLabel( double posx,double posy){
+        int valor= (int) (Math.random()*(this.getPalabras().size()));
+        letra= new Letra[this.getWord(valor).size()];
+        
+        int x=10;
+        for(int i=0; i<letra.length; i++){
+            letra[i]=new Letra(this.getWord(valor).get(i),(x),10);
+            this.labelWord.add(letra[i].getLetra());
+            group.getChildren().add(letra[i].getLetra());
+            group.relocate(posx, posy);
+            x=30+x;
+        }
+        return group; 
+    }
+
+    public ArrayList<Label> getLabelWord() {
+        return labelWord;
+    }
+    
+    
 
     public void llamarArray() {
         try {
@@ -61,10 +85,11 @@ public class Palabras {
             System.out.println("No se encuetra el archivo");
         }
     }
-
+    
+    
     public void obtenerDeArchivo() throws FileNotFoundException {
-        this.archivo = new File("C:\\Users\\best buy\\Documents\\NetBeansProjects\\New Folder\\POOProject\\palabras.txt");
-        
+        //this.archivo = new File(Palabras.class.getResource("palabras.txt").toExternalForm());
+        this.archivo = new File("C:\\Users\\Marbelisa\\Desktop\\Proyecto\\POOProject\\src\\Enemigos\\palabras.txt");
         Scanner leer = new Scanner(archivo);
 
         while (leer.hasNext()) {
