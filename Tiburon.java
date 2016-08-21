@@ -81,6 +81,21 @@ public final class Tiburon implements Runnable {
         }
 
     }
+    
+     public boolean verificar() {
+        int j = 0;
+        for (int i = 0; i < palabras.getLabelWord().size(); i++) {
+            if (palabras.getLabelWord().get(i).getTextFill() == Color.YELLOW) {
+                j++;
+            }
+        }
+        if(j==palabras.getLabelWord().size()){
+            return true;
+        }
+        
+        return false;
+
+    }
 
     public ImageView getIv_tiburon() {
         return iv_tiburon;
