@@ -33,7 +33,7 @@ public final class Mar implements Runnable {
     private Circle[] c, f;
     private ArrayList<Tiburon> tiburones;
     private Buseador buso;
-    private ArrayList<Thread> thread;
+    private HashMap<Tiburon, Thread> thread;
     private int numTiburon;
     private Random random = new Random();
     private int ancho;
@@ -44,6 +44,7 @@ public final class Mar implements Runnable {
         p = new Pane();
         p.maxWidth(ancho);
         p.maxHeight(alto);
+        tiburones = new ArrayList<Tiburon>();
         this.imagen = new Image(Mar.class.getResource("FondoMarino.jpg").toExternalForm());
         this.verImagen = new ImageView();
         this.verImagen.setImage(imagen);
@@ -54,6 +55,7 @@ public final class Mar implements Runnable {
         this.addBuzo();
         this.alto = alto;
         this.ancho = ancho;
+        this.addDatosBuzo();
         p.setFocusTraversable(true);
         p.setOnKeyPressed(new Teclea());
     }
@@ -104,25 +106,39 @@ public final class Mar implements Runnable {
         }
     }
 
-    public void addTiburones() {
-        tiburones = new Tiburon[5];
-        for (int j = 0; j < tiburones.length; j++) {
-            int posy = (int) (Math.random() * 500);
-             int tiempo = (int) (Math.random() * 1000);
-            tiburones[j] = new Tiburon(j,950, posy,tiempo);
-            p.getChildren().add(tiburones[j].getGroup());
+    public void addTiburones(int numTiburones) {
+
+        for (int j = 0; j < numTiburones; j++) {
+            int posy = random.nextInt(6) * (-100) + 400;
+            int tiempo = (int) (Math.random() * 1000);
+            tiburones.add(new Tiburon(950, posy, tiempo));
+            p.getChildren().add(tiburones.get(j).getGroup());
         }
     }
     
-    public void verificarTiburon() {
-        for (int i = 0; i < this.getTiburones().size(); i++) {
-            if(this.getTiburones().get(i).verificar()==true){
-                this.buso.setPuntaje(100);
-                System.out.println("Letra completada" + this.getTiburones().get(i).getLabel().toString());
+    public void verificarHilo() {
+        for (int i = 0; i < this.thread.size(); i++) {
+            if (this.thread.get(this.getTiburones().get(i)).isAlive() != true) {
+                this.thread.remove(this.getTiburones().get(i));
+                if (this.getTiburones().contains(this.getTiburones().get(i)) == true) {
+                    if (this.thread.get(this.getTiburones().get(i)) == null) {
+                        if (this.getTiburones().get(i).verificar() == true) {
+                            int punto = this.buso.getPuntaje();
+                            punto = punto + 100;
+                            this.buso.setPuntaje(punto);
+                            this.getTiburones().remove(this.getTiburones().get(i));
+                            System.out.println("Entro");
+                        } else if (this.getTiburones().get(i).verificar() == false) {
+                            this.getTiburones().remove(this.getTiburones().get(i));
+                            int vida = this.buso.getVida();
+                            vida = vida - 1;
+                            this.buso.setVida(vida);
+                            System.out.println("Vida : " + this.buso.getVida());
+                        }
+                    }
+                }
             }
-            System.out.println("Letra NO completada" );
         }
-
     }
 
     public void verificarPalabra(String e) {
@@ -134,7 +150,11 @@ public final class Mar implements Runnable {
                         for (int n = 0; n < this.getTiburones().size(); n++) {
                             if (n == 0) {
                                 if (((Label) this.getTiburones().get(n).getLabel().getChildren().get(0)).getText().equals(letra.getText())) {
-                                    if (((Label) this.getTiburones().get(n + 1).getLabel().getChildren().get(0)).getTextFill() != Color.YELLOW) {
+                                    if (n != this.getTiburones().size() - 1) {
+                                        if (((Label) this.getTiburones().get(n + 1).getLabel().getChildren().get(0)).getTextFill() != Color.YELLOW) {
+                                            ((Label) this.getTiburones().get(n).getLabel().getChildren().get(0)).setTextFill(Color.YELLOW);
+                                        }
+                                    } else {
                                         ((Label) this.getTiburones().get(n).getLabel().getChildren().get(0)).setTextFill(Color.YELLOW);
                                     }
                                 }
@@ -152,14 +172,11 @@ public final class Mar implements Runnable {
                                 }
                             }
                         }
-
-                        System.out.println("eNTRO");
                     }
                 } else if (j != 0) {
                     if (((Label) this.getTiburones().get(i).getLabel().getChildren().get(j - 1)).getTextFill() == Color.YELLOW) {
                         if (((Label) this.getTiburones().get(i).getLabel().getChildren().get(j)).getText().equals(letra.getText())) {
                             ((Label) this.getTiburones().get(i).getLabel().getChildren().get(j)).setTextFill(Color.YELLOW);
-                            System.out.println("eNTRO1");
                         }
                     }
 
@@ -190,18 +207,28 @@ public final class Mar implements Runnable {
 
     @Override
     public void run() {
-            thread = new ArrayList<>();
-            Iterator t = thread.iterator();
-            for (int i = 0; i < this.getTiburones().length; i++) {
-               this.thread.add(new Thread(this.getTiburones()[i]));
+             Thread t = new Thread(this.buso);
+        t.start();
+        thread = new HashMap<Tiburon, Thread>();
+
+        while (this.buso.getVida() != 0) {
+            
+            for (int i = 0; i < this.getTiburones().size(); i++) {
+                this.thread.put(this.getTiburones().get(i), new Thread(this.getTiburones().get(i)));
+                this.thread.get(this.getTiburones().get(i)).start();
             }
 
-            while (true) {
-               for (int i = 0; i < thread.size(); i++) {
-                 this.thread.get(i).start();
-               }
-             break;
-           }
+            while (this.getTiburones().isEmpty() != true) {
+                this.verificarHilo();
+
+            }
+            System.out.println("los tiburones fueron eliminados");
+
+        }
+        System.out.println("VIDA: " + this.buso.getVida());
+        System.out.println("PUNTOS: " + this.buso.getPuntaje());
+        System.out.println("BUZO ASESADO D:");
+    }
     }
     
     private class Teclea implements EventHandler<KeyEvent> {
@@ -211,7 +238,7 @@ public final class Mar implements Runnable {
             if (e.getCode() != KeyCode.CAPS) {
                 String letra = e.getText();
                 verificarPalabra(letra);
-                verificarTiburon();
+                
             }
 
         }
