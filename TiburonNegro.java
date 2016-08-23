@@ -5,6 +5,9 @@
  */
 package Enemigos;
 
+import Enemigos.Palabras;
+import Enemigos.Pez;
+import Enemigos.Tiburon;
 import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.image.Image;
@@ -15,10 +18,10 @@ import javafx.scene.paint.Color;
  *
  * @author best buy
  */
-public final class Tiburon extends Pez{
-        private Palabras palabras;
+public final class TiburonNegro extends Pez{
+    private final Palabras palabras;
     
-    public Tiburon(double x, double y, long time) {
+    public TiburonNegro(double x, double y, long time) {
         super(x, y, time);
         this.palabras= new Palabras("palabras");
         this.cargarImagen();
@@ -26,17 +29,21 @@ public final class Tiburon extends Pez{
         this.addLetter();
     }
 
+    @Override
     public void run() {
         try {
             while (group.getLayoutX() > -900 && group.getLayoutX() < 11 && this.verificar() == false) {
+                  
                 Platform.runLater(() -> {
                     group.setLayoutX(group.getLayoutX() - 20);
                     System.out.println("" + group.getLayoutX());
                 });
 
                 Thread.sleep(time);
-            }
-            Platform.runLater(() -> {
+                    }
+                              
+                Platform.runLater(() -> {
+                    
                 group.getChildren().removeAll(this.label,this.group.getChildren().get(0));
                 
                 System.out.println("Tiburon muerto");
@@ -56,13 +63,13 @@ public final class Tiburon extends Pez{
         iv_tiburon.relocate(x, y);
         return this.group;
     }
+    
 
     @Override
     public void addLetter() {
         label = palabras.getPalabraEnLabel(70 + x, y + 195);
         label.setFocusTraversable(true);
         group.getChildren().add(label);
-    
     }
     
     @Override
@@ -86,7 +93,12 @@ public final class Tiburon extends Pez{
         return false;
 
     }
-
+    public void verificarAgain(){
+        if (this.verificar()==true);
+        
+        
+    }
+    
     public Palabras getPalabras() {
         return palabras;
     }
